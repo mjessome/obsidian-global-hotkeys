@@ -1,0 +1,10 @@
+{
+	"id": "obsidian-global-hotkeys",
+	"name": "Global Hotkeys",
+	"version": "1.0.1",
+	"minAppVersion": "0.9.12",
+	"description": "",
+	"author": "Marc Jessome",
+	"authorUrl": "https://marcjessome.ca",
+	"isDesktopOnly": true
+}
