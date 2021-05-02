@@ -1,5 +1,6 @@
 import { App, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 const remote = require('electron').remote;
+const globalShortcut = remote.globalShortcut;
 
 interface GlobalHotkeysPluginSettings {
   accelerators: { [key: string]: string };
@@ -11,16 +12,54 @@ const DEFAULT_SETTINGS: GlobalHotkeysPluginSettings = {
 
 export default class GlobalHotkeysPlugin extends Plugin {
   settings: GlobalHotkeysPluginSettings;
+  currentlyMapped: { [key: string]: string };
 
-  async registerGlobalShortcut(accelerator:string, callback:()=>void) {
-    remote.globalShortcut.register(accelerator, () => {
-      this.app.setting.close(); // Ensure all modals are closed?
-      callback();
-      remote.getCurrentWindow().show(); // Activate obsidian
-    });
+  async registerGlobalShortcut(command_id:string, accelerator:string,
+                               oncomplete?:(success:boolean)=>void) {
+    if (command_id in this.currentlyMapped) {
+      this.unregisterGlobalShortcut(command_id);
+    }
+
+    let success = (() => {
+      try {
+        return globalShortcut.register(accelerator, () => {
+          const command = app.commands.commands[command_id];
+          if (!command) return;
+          this.app.setting.close(); // Ensure all modals are closed?
+          if (command.checkCallback)
+            command.checkCallback(false);
+          else if (command.callback)
+            command.callback();
+          remote.getCurrentWindow().show(); // Activate obsidian
+        });
+      } catch (error) {
+        return false;
+      }
+    })();
+
+    if (success) {
+      this.currentlyMapped[command_id] = accelerator;
+    }
+
+    if (oncomplete) {
+      oncomplete(success);
+    }
+  }
+
+  async unregisterGlobalShortcut(command_id:string) {
+    const accelerator = this.currentlyMapped[command_id];
+    if (accelerator) {
+      globalShortcut.unregister(accelerator);
+      delete this.currentlyMapped[command_id];
+    }
+  }
+
+  isRegistered(command_id:string) {
+    return (command_id in this.currentlyMapped);
   }
 
   async onload() {
+    this.currentlyMapped = {};
 
     this.addCommand({
       id: 'bring-to-front',
@@ -36,23 +75,16 @@ export default class GlobalHotkeysPlugin extends Plugin {
 
     for (const cmd in this.settings.accelerators) {
       const a = this.settings.accelerators[cmd];
-      if (!a) continue;
-      this.registerGlobalShortcut(a, () => {
-        const command = app.commands.commands[cmd];
-        if (command) {
-          if (command.checkCallback)
-            command.checkCallback(false);
-          else if (command.callback)
-            command.callback();
-        }
-      });
+      if (a) {
+        this.registerGlobalShortcut(cmd, a);
+      }
     }
 
     this.addSettingTab(new GlobalShortcutSettingTab(this.app, this));
   }
 
   onunload() {
-    remote.globalShortcut.unregisterAll();
+    globalShortcut.unregisterAll();
   }
 
   async loadSettings() {
@@ -86,6 +118,12 @@ class GlobalShortcutSettingTab extends PluginSettingTab {
     });
   }
 
+  async removeSavedAccelerator(command_id:string) {
+    this.plugin.unregisterGlobalShortcut(command_id);
+    delete this.plugin.settings.accelerators[command_id];
+    await this.plugin.saveSettings();
+  }
+
   display(): void {
     let {containerEl} = this;
     this.settingElems = []
@@ -110,20 +148,27 @@ class GlobalShortcutSettingTab extends PluginSettingTab {
     cmdKeys.forEach(cmd => {
       const accelerator = this.plugin.settings.accelerators[cmd];
       const name = allCmds[cmd].name;
-      this.settingElems.push(new Setting(containerEl)
+      let elem = new Setting(containerEl)
         .setName(name)
         .addText(text => text
                  .setPlaceholder('Hotkey')
                  .setValue(accelerator)
                  .onChange(async (value) => {
                    if (value) {
-                     this.plugin.settings.accelerators[cmd] = value;
-                   } else if (cmd in this.plugin.settings.accelerators) {
-                     delete this.plugin.settings.accelerators[cmd];
+                     this.plugin.registerGlobalShortcut(cmd, value, async (success) => {
+                       if (success) {
+                         this.plugin.settings.accelerators[cmd] = value;
+                         await this.plugin.saveSettings();
+                       } else {
+                         this.removeSavedAccelerator(cmd);
+                       }
+                     });
+                   } else {
+                     this.removeSavedAccelerator(cmd);
                    }
-                   await this.plugin.saveSettings();
-                 })));
-      });
+                 }));
+      this.settingElems.push(elem);
+    });
 
     this.updateHotkeyVisibility();
   }
