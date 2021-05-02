@@ -129,6 +129,25 @@ class GlobalShortcutSettingTab extends PluginSettingTab {
     this.settingElems = []
 
     containerEl.empty();
+
+    containerEl.createDiv('', div => {
+      const text = document.createElement('p');
+      text.appendText("For information on key bindings, see documentation ");
+
+      const link = document.createElement('a');
+      link.setAttribute('href', "https://www.electronjs.org/docs/api/accelerator#available-modifiers");
+      link.textContent = "here";
+      text.appendChild(link);
+
+      text.appendText(".");
+      div.appendChild(text);
+
+      const exampleText = document.createElement('p');
+      exampleText.appendChild(document.createElement('strong')).appendText('Example: ');
+      exampleText.appendText('Cmd+Shift+Ctrl+Alt+N');
+      div.appendChild(exampleText);
+    });
+
     containerEl.createDiv('hotkey-search-container', div => {
       let filterEl = document.createElement('input');
       div.appendChild(filterEl);
