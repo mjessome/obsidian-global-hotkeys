@@ -111,10 +111,7 @@ class GlobalShortcutSettingTab extends PluginSettingTab {
     this.settingElems.forEach((e) => {
       const elemName = e.nameEl.textContent.toLowerCase();
       const visible = this.filterString.length == 0 || elemName.contains(this.filterString);
-      if (visible)
-        e.settingEl.show();
-      else
-        e.settingEl.hide();
+      e.settingEl.toggle(visible);
     });
   }
 
@@ -167,26 +164,30 @@ class GlobalShortcutSettingTab extends PluginSettingTab {
     cmdKeys.forEach(cmd => {
       const accelerator = this.plugin.settings.accelerators[cmd];
       const name = allCmds[cmd].name;
-      let elem = new Setting(containerEl)
+      let setting = new Setting(containerEl)
         .setName(name)
         .addText(text => text
                  .setPlaceholder('Hotkey')
                  .setValue(accelerator)
                  .onChange(async (value) => {
+                   const inputEl = setting.components[0].inputEl;
                    if (value) {
                      this.plugin.registerGlobalShortcut(cmd, value, async (success) => {
                        if (success) {
+                         inputEl.classList.remove('invalid-accelerator');
                          this.plugin.settings.accelerators[cmd] = value;
                          await this.plugin.saveSettings();
                        } else {
                          this.removeSavedAccelerator(cmd);
+                         inputEl.classList.add('invalid-accelerator');
                        }
                      });
                    } else {
+                     inputEl.classList.remove('invalid-accelerator');
                      this.removeSavedAccelerator(cmd);
                    }
                  }));
-      this.settingElems.push(elem);
+      this.settingElems.push(setting);
     });
 
     this.updateHotkeyVisibility();
