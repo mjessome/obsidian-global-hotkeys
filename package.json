@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-global-shortcuts",
-  "version": "0.12.0",
-  "description": "Register global shortcuts for obsidian",
+  "name": "obsidian-global-hotkeys",
+  "version": "0.1.0",
+  "description": "Register global hotkeys for obsidian",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
