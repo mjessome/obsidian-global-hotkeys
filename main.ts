@@ -26,11 +26,18 @@ export default class GlobalHotkeysPlugin extends Plugin {
           const command = app.commands.commands[command_id];
           if (!command) return;
           this.app.setting.close(); // Ensure all modals are closed?
+          const win = remote.getCurrentWindow();
+          const wasHidden = !win.isFocused() || !win.isVisible();
+
           if (command.checkCallback)
             command.checkCallback(false);
           else if (command.callback)
             command.callback();
-          remote.getCurrentWindow().show(); // Activate obsidian
+
+          // only activate Obsidian if visibility hasn't changed
+          const isHidden = !win.isFocused() || !win.isVisible();
+          if (wasHidden && isHidden)
+            remote.getCurrentWindow().show(); // Activate obsidian
         });
       } catch (error) {
         return false;
