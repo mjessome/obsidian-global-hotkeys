@@ -71,6 +71,22 @@ export default class GlobalHotkeysPlugin extends Plugin {
       }
     });
 
+    this.addCommand({
+      id: 'show-hide',
+      name: 'Show/Hide Obsidian',
+      checkCallback: (checking: boolean) => {
+        if (!checking) {
+          const win = remote.getCurrentWindow();
+          if (win.isVisible()) {
+            win.hide();
+          } else {
+            win.show();
+          }
+        }
+        return true;
+      }
+    });
+
     await this.loadSettings();
 
     for (const cmd in this.settings.accelerators) {

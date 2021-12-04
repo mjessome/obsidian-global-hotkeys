@@ -7,7 +7,8 @@ This is an [Obsidian](https://obsidian.md) plugin, adding support for system-wid
 - Any Obsidian command can be mapped
 - Brings Obsidian to the front on every command
 - Extra commands added:
-  - Bring obsidian to front
+  - Bring Obsidian to front
+  - Show/Hide Obsidian
 
 ## Settings
 
@@ -17,4 +18,4 @@ will perform the specified command. The key combination is specified following
 
 ## To-Do
 
-- Better hotkey settings
+- Improve hotkey settings
