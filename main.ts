@@ -88,7 +88,7 @@ export default class GlobalHotkeysPlugin extends Plugin {
             if (Platform.isMacOS) {
               remote.Menu.sendActionToFirstResponder('hide:');
             } else {
-              win.hide();
+              win.blur();
             }
           } else {
             win.show();
