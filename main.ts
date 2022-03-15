@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Modal, Notice, Platform, Plugin, PluginSettingTab, Setting } from 'obsidian';
 const remote = require('electron').remote;
 const globalShortcut = remote.globalShortcut;
 
@@ -85,7 +85,11 @@ export default class GlobalHotkeysPlugin extends Plugin {
         if (!checking) {
           const win = remote.getCurrentWindow();
           if (win.isVisible()) {
-            win.hide();
+            if (Platform.isMacOS) {
+              remote.Menu.sendActionToFirstResponder('hide:');
+            } else {
+              win.hide();
+            }
           } else {
             win.show();
           }
