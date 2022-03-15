@@ -100,6 +100,7 @@ export default class GlobalHotkeysPlugin extends Plugin {
 
     await this.loadSettings();
 
+    globalShortcut.unregisterAll();
     for (const cmd in this.settings.accelerators) {
       const a = this.settings.accelerators[cmd];
       if (a) {
