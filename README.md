@@ -14,7 +14,7 @@ This is an [Obsidian](https://obsidian.md) plugin, adding support for system-wid
 
 In the `Global Hotkeys` settings, you can enter a system-wide key combination that
 will perform the specified command. The key combination is specified following
-[Electron's Accelerators](https://www.electronjs.org/docs/api/accelerator).
+[Electron's Accelerators](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers).
 
 ## To-Do
 
