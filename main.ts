@@ -160,7 +160,7 @@ class GlobalShortcutSettingTab extends PluginSettingTab {
       text.appendText("For information on key bindings, see documentation ");
 
       const link = document.createElement('a');
-      link.setAttribute('href', "https://www.electronjs.org/docs/api/accelerator#available-modifiers");
+      link.setAttribute('href', "https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers");
       link.textContent = "here";
       text.appendChild(link);
 
